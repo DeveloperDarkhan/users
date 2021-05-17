@@ -1,0 +1,7 @@
+---
+- name: Delete old users
+  user:
+    name: "{{ item }}"
+    state: absent
+    remove: yes
+  with_items: "{{ old_users }}"

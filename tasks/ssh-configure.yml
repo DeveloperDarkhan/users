@@ -1,0 +1,14 @@
+---
+- name: Set PermitRootLogin
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: "PermitRootLogin {{ ssh_permit_root_login }}"
+    regexp: '^PermitRootLogin.*'
+  notify: sshd restart
+
+- name: Set PasswordAuthentication
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: "PasswordAuthentication {{ ssh_password_authentication }}"
+    regexp: '^PasswordAuthentication.*'
+  notify: sshd restart

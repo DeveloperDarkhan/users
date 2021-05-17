@@ -1,0 +1,15 @@
+---
+- name: Install openssh package
+  package:
+    name: openssh-server
+    state: present
+
+
+- name: Configure users
+  import_tasks: "add-users.yml"
+
+- name: Configure ssh config file
+  import_tasks: "ssh-configure.yml"
+
+- name: Configure users
+  import_tasks: "delete-old-users.yml"

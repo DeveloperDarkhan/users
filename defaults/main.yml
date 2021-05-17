@@ -1,0 +1,23 @@
+---
+# yes or no
+ssh_permit_root_login: 'no'
+ssh_password_authentication: 'no'
+
+# default admin users
+users:
+################## We need to add tech account here ##################
+  - name: dmukhamedyarov
+    comment: Darkhan Mukhamedyarov
+    password: $6$DKBe0t7.$LcVlvbPGSX7aGqPSjRVTNEN9PzLDhI.ExYqHHiSbpgfpn.UIzWCvLCzO3hKu/67dExnMvgDraKgQhr9qdPnHi/
+    public_key: "{{ lookup('file', 'ssh_keys/admins/dmukhamedyarov.pub' )}}"
+
+  - name: tmukhamedyarov
+    comment: Test Mukhamedyarov
+    password: $5$rounds=535000$pYUY9pVKs8eNZVXH$ICyN3aTi4cuvJW/FIMBtTuV2OzwM4cMW8i.qxRAuW6B
+    public_key: "{{ lookup('file', 'ssh_keys/admins/tmukhamedyarov.pub' )}}"
+    
+# Developer users, add to group vars or host vars
+developer_users: []
+
+# Delete users
+old_users: []

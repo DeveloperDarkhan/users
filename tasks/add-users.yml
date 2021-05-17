@@ -1,0 +1,86 @@
+---
+- name: Debian - Select default sudo group for Debian and create new variables
+  set_fact:
+    sudo_group: "sudo"
+    ssh_service: "ssh"
+  when: ansible_os_family in ["Debian"]
+
+- name: RedHat - Select default sudo group for RedHat and create new variables
+  set_fact:
+    sudo_group: "wheel"
+    ssh_service: "sshd"
+  when: ansible_os_family in ["RedHat", "VirtuozzoLinux", "SHMZ"]
+
+- name: Create required groups
+  group:
+    name: "{{ sudo_group }}"
+
+################### Creating developers accounts ######################################
+
+- name: Create developer users or other accounts
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default('') }}"
+    password: "{{ item.password | default('!') }}"
+    groups: "{{ sudo_group }}"
+    append: "{{ item.append | default('yes') }}" # Add user to group {{ sudo_group }}
+    state: "{{ item.state | default('present') }}" # If user isn't exist then create him
+    shell: /bin/bash # Add user ability use bash
+  with_items: "{{ developer_users }}"
+  when:
+    - developer_users|length > 0
+
+- name: Create ssh developer directory or other accounts
+  file:
+    path: "/home/{{ item.name | default('dmukhamedyarov') }}/.ssh"
+    state: directory
+    owner: "{{ item.name | default('root') }}"
+    group: "{{ item.name | default('root') }}"
+    mode: 0700
+  with_items: "{{ developer_users }}"
+  when:
+    - developer_users|length > 0
+
+- name: Add authorized keys to developer users
+  copy:
+    content: "{{ item.public_key }}"
+    dest: "/home/{{ item.name }}/.ssh/authorized_keys"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: 0600
+    remote_src: yes
+  with_items: "{{ developer_users }}"
+  when:
+    - developer_users|length > 0
+
+################### Creating admin accounts ######################################
+
+- name: Create admin user or other with privileged rights
+  user:
+    name: "{{ item.name }}"
+    comment: "{{ item.comment | default('') }}"
+    password: "{{ item.password | default('!') }}"
+    groups: "{{ sudo_group }}"
+    append: "{{ item.append | default('yes') }}" # Add user to group {{ sudo_group }}
+    state: "{{ item.state | default('present') }}" # If user isn't exist then create him
+    shell: /bin/bash # Add user ability use bash
+  with_items: "{{ users }}"
+
+- name: Create ssh directory for admins or other users with privileged rights
+  file:
+    path: "/home/{{ item.name | default('dmukhamedyarov') }}/.ssh"
+    state: directory
+    owner: "{{ item.name | default('root') }}"
+    group: "{{ item.name | default('root') }}"
+    mode: 0700
+  with_items: "{{ users }}"
+
+- name: Add authorized keys to admins accounts
+  copy:
+    content: "{{ item.public_key }}"
+    dest: "/home/{{ item.name }}/.ssh/authorized_keys"
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: 0600
+    remote_src: yes
+  with_items: "{{ users }}"
